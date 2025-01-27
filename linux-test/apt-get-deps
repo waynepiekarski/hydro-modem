@@ -1,0 +1,4 @@
+#!/bin/bash
+
+set -xeu
+sudo apt-get install --yes minimodem lame libsndfile1-dev sox libasound2-dev build-essential
