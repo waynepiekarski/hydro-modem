@@ -1,1 +1,7 @@
-
+/modemrx/build
+/arduino-*
+/linux-test/.temp/
+/linux-test/bell103-goertzel-decoded.csv
+/linux-test/bell103_goertzel_wav_decoder
+/linux-test/bell103_goertzel_wav_encoder
+/linux-test/microphone-bell103-goertzel-recorded.wav
