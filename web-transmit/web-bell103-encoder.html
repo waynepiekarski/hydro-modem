@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bell103 Character to Audio Generator</title>
+</head>
+<body>
+
+Text: <input type="text" id="charInput" placeholder="Enter characters">
+Baud: <input type="number" id="baudRate" value="10" maxlength="5" style="width: 5em;">
+<button onclick="convertToAudio()">Play</button>
+Repeat: <input type="checkbox" id="loop" value="false">
+
+<pre id="log">Log</pre>
+
+<script>
+function logline(str) {
+    console.log(str);
+    document.getElementById("log").innerHTML += str + "\n";
+}
+
+function reverse(s){
+    return s.split("").reverse().join("");
+}
+
+function convertToAudio() {
+  // Always prepend mark padding tones to the start to flush out the receiver and get it in sync
+  const charInput = "@" + document.getElementById("charInput").value;
+  document.getElementById("log").innerHTML = "";
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const baudRate = document.getElementById("baudRate").value;
+  const loopAudio = document.getElementById("loop").checked;
+  const sampleRate = audioCtx.sampleRate;
+  const samplesPerBaud = sampleRate / baudRate;
+  const bitsPerChar = 1 + 1 + 8 + 1;
+  const numSamples = bitsPerChar * charInput.length * samplesPerBaud;
+  logline(`Sending tones for sampleRate ${sampleRate} with samplesPerBaud ${samplesPerBaud} from baudRate ${baudRate} loop ${loopAudio}`);
+  const buffer = audioCtx.createBuffer(1, numSamples, sampleRate);
+  const data = buffer.getChannelData(0);
+  let d = 0;
+
+  for (let i = 0; i < charInput.length; i++) {
+    const char = charInput[i];
+    const charCode = charInput.charCodeAt(i);
+    const binaryString = charCode.toString(2).padStart(8, '0');
+    let totalBinaryString = "10" + reverse(binaryString) + "1";
+    if (char == '@') {
+        // Special character to emit enough mark tones to get the receiver in sync
+        totalBinaryString = "11111111111";
+        logline(`Processing special mark tone to flush the receiver: 11+11111111+1`);
+    } else {
+        logline(`Processing character: ${char} (ASCII code: ${charCode})`);
+        logline(`Binary representation: 10+reverse(${binaryString})+1 to ${totalBinaryString}`);
+    }
+
+    for (let j = 0; j < totalBinaryString.length; j++) {
+      const bit = totalBinaryString[j];
+      const freq = bit === '1' ? 1270 : 1070;
+
+      let pad = j < 10 ? " " : "";
+      logline(`  Ofs ${pad}${j}: ${bit} -> Frequency: ${freq} Hz`);
+      for (let k = 0; k < samplesPerBaud; k++) {
+        const t = k / sampleRate;
+        data[d] = Math.sin(2 * Math.PI * freq * t);
+        d++;
+      }
+    }
+  }
+
+  const source = audioCtx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = loopAudio;
+  source.connect(audioCtx.destination);
+  source.start();
+}
+</script>
+
+</body>
+</html>
