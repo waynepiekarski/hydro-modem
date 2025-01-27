@@ -1,0 +1,14 @@
+#!/bin/bash
+
+ARCH="$(uname --machine)"
+export ARDUINO_DATA_DIR=`dirname $0`/arduino-data-$ARCH-dir
+if [[ "$1" == "--no-sketchbook" ]]; then
+    shift
+    export ARDUINO_SKETCHBOOK_DIR=`dirname $0`/arduino-sketchbook-none
+else
+    export ARDUINO_SKETCHBOOK_DIR=`dirname $0`/arduino-sketchbook-dir
+fi
+export ARDUINO_DOWNLOADS_DIR=`dirname $0`/arduino-downloads-dir
+echo "ARDUINO_DATA_DIR=$ARDUINO_DATA_DIR ARDUINO_SKETCHBOOK_DIR=$ARDUINO_SKETCHBOOK_DIR ARDUINO_DOWNLOADS_DIR=$ARDUINO_DOWNLOADS_DIR"
+set -xv
+`dirname $0`/arduino-cli-$ARCH "$@"

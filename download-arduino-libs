@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cd `dirname $0`
+set -v
+
+# Nuke all the previous downloads so this will actually refresh the files
+rm -rf arduino-downloads-dir/libraries arduino-sketchbook-dir
+
+# Refresh all the downloaded libs, and install any dependencies
+./run-arduino-cli lib update-index
