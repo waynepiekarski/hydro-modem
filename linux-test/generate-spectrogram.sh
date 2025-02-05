@@ -18,8 +18,11 @@ fi
 set -xv
 
 ffmpeg -y -f lavfi -i \
-       "amovie=${INPUT},asplit=2[out1][waves]; [waves]pan=1c|c0=c0,showspectrumpic=s=1920x1024:fscale=lin:start=500:stop=6600[out0]" "${INPUT}-spectrogram.png" \
+       "amovie=${INPUT},asplit=2[out1][waves]; [waves]pan=1c|c0=c0,showspectrumpic=s=1920x1024:win_func=hann:fscale=lin:start=500:stop=6600:legend=true:color=rainbow:scale=log:gain=100[out0]" "${INPUT}-spectrogram.png" \
        || exit 1
+
+# Use sox to generate an equivalent spectrogram
+sox "${INPUT}" -n spectrogram -x 800 -y 512 -o "${INPUT}-spectrogram-sox.png" || exit 1
 
 # Generate spectrogram with the video overlaid in a scale (320,*) and origin=(175,0) - this can fail if the input file does not include a video stream, so do not check for errors
 if [[ "$(file --dereference ${INPUT} | grep WAVE)" == "" ]]; then
@@ -39,8 +42,11 @@ fi
 # Generate just a spectrogram with no video included
 # Need to use power of two for the Y-resolution, otherwise this seems to run 100x slower on Debian 12, which is related to the above bug
 ffmpeg -y -f lavfi -i \
-       "amovie=${INPUT},asplit=2[out1][waves]; [waves]pan=1c|c0=c0,showspectrum=s=1920x1024:fscale=lin:overlap=1:start=500:stop=6600:legend=true:slide=scroll:color=rainbow:scale=log:gain=100[out0]" \
+       "amovie=${INPUT},asplit=2[out1][waves]; [waves]pan=1c|c0=c0,showspectrum=s=512x512:fscale=lin:overlap=1:start=500:stop=6600:legend=true:slide=scroll:color=rainbow:scale=log:gain=100[out0]" \
        -c:a copy \
        -crf 25 -codec:v libx264 -bf 2 -flags +cgop -pix_fmt yuv420p \
        "${INPUT}-spectrogram.mkv" \
        || exit 1
+
+# Export the last frame of the spectrogram video out to an image, it looks nicer than the equivalent showspectrumpic
+ffmpeg -sseof -1 -i "${INPUT}-spectrogram.mkv" -vframes 1 "${INPUT}-spectrogram-lastframe.png" || exit 1
