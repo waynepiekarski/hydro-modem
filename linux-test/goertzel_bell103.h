@@ -4,7 +4,7 @@
 // Underwater Bell 103 modem implementation for low-power microcontrollers
 //
 // Copyright (C) 2024-2025 Wayne Piekarski
-// wayne@tinmith.net https://waynepiekarski.net
+// wayne@tinmith.net https://waynepiekarski.net/projects/hydro-modem.htm
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
