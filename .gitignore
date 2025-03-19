@@ -5,3 +5,14 @@
 /linux-test/bell103_goertzel_wav_decoder
 /linux-test/bell103_goertzel_wav_encoder
 /linux-test/microphone-bell103-goertzel-recorded.wav
+
+# KiCAD v5
+*.net
+*.sch-bak
+*.kicad_pcb-bak
+fp-info-cache
+_autosave-*.*
+*.bak
+*.bck
+design-rescue.dcm
+design-rescue.lib

@@ -106,11 +106,25 @@ from a phone transmitter. Once this is working, you then need to connect a hydro
 of a suitable hydrophone and how to connect it is future work. Make sure that your microphone does not exceed the
 voltage specs of the Arduino ADC.
 
-Future work is to provide a circuit schematic and PCB layout for a custom dual ATmega328P design with input from a piezo microphone.
-The modem also needs to be tested in water and frequencies tuned for best performance.
+
+# KiCAD v5 schematics and PCB layouts
+
+These designs need to be built and tested. The modem also needs to be tested in water and frequencies tuned for best performance.
+
+## kicad/release-modem-atmega328p/design.pro
+
+5V ATmega328P running at 16 MHz. Requires regulated 5V provided by the other board. Connects to
+a piezo-based microphone and includes protection diodes. Only runs the HydroModem implementation and nothing else.
+Arduino Uno-compatible AVRISP6 connector for programming.
+
+## kicad/release-serial-i2c-atmega328p-switch/design.pro
+
+3.3V ATmega328P running at 8 MHz. Implements a MOSFET that can switch high-current to burn a nichrome release wire.
+Provides on-board MCP1792 regulators for 3.3V and 5V from a >= 6.2V battery. Arduino Uno-compatible AVRISP6 connector
+for programming.
 
 
-# License
+# Source Code License
 
 HydroModem: Underwater Bell 103 modem implementation for low-power microcontrollers
 
@@ -130,3 +144,22 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# KiCAD Schematics and PCB License
+
+This source describes Open Hardware and is licensed under the CERN-OHL-S v2.
+
+You may redistribute and modify this source and make products using it under
+the terms of the CERN-OHL-S v2 (https://ohwr.org/cern_ohl_s_v2.txt).
+
+This source is distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY,
+INCLUDING OF MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A
+PARTICULAR PURPOSE. Please see the CERN-OHL-S v2 for applicable conditions.
+
+Source location: https://www.waynepiekarski.net/projects/hydro-modem.htm
+
+As per CERN-OHL-S v2 section 4, should You produce hardware based on this
+source, You must where practicable maintain the Source Location visible
+on the external case of the device or other products you make using this
+source.
