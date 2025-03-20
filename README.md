@@ -110,21 +110,37 @@ voltage specs of the Arduino ADC.
 # KiCAD v5 schematics and PCB layouts
 
 These designs need to be built and tested. The modem also needs to be tested in water and frequencies tuned for best performance.
+Full project files are provided, including .kicad_pcb files for fabrication at <a href="https://oshpark.com">oshpark.com</a>.
 
-## kicad/release-modem-atmega328p/design.pro
+## kicad/release-modem-atmega328p/
 
 5V ATmega328P running at 16 MHz. Requires regulated 5V provided by the other board. Connects to
 a piezo-based microphone and includes protection diodes. Only runs the HydroModem implementation and nothing else.
 Arduino Uno-compatible AVRISP6 connector for programming.
 
-## kicad/release-serial-i2c-atmega328p-switch/design.pro
+<a href="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1"><img src="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1" width="271" height="181"></a>
+<a href="kicad/release-modem-atmega328p/release-modem-atmega328p-col-front.png?raw=1"><img src="kicad/release-modem-atmega328p/release-modem-atmega328p-col-front.png?raw=1" width="271" height="182"></a>
+
+<a href="kicad/release-modem-atmega328p/release-modem-atmega328p-schematic.pdf?raw=1">Schematics PDF</a>
+
+<a href="kicad/release-modem-atmega328p/design.kicad_pcb?raw=1">kicad_pcb</a>
+
+
+## kicad/release-serial-i2c-atmega328p-switch/
 
 3.3V ATmega328P running at 8 MHz. Implements a MOSFET that can switch high-current to burn a nichrome release wire.
 Provides on-board MCP1792 regulators for 3.3V and 5V from a >= 6.2V battery. Arduino Uno-compatible AVRISP6 connector
 for programming.
 
+<a href="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-back.png?raw=1"><img src="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-back.png?raw=1" width="459" height="193"></a>
+<a href="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-front.png?raw=1"><img src="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-front.png?raw=1" width="459" height="193"></a>
 
-# Source Code License
+<a href="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-schematic.pdf?raw=1">Schematics PDF</a>
+
+<a href="kicad/release-serial-i2c-atmega328p-switch/design.kicad_pcb?raw=1">kicad_pcb</a>
+
+
+# Source code GPLv3 license
 
 HydroModem: Underwater Bell 103 modem implementation for low-power microcontrollers
 
@@ -146,7 +162,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# KiCAD Schematics and PCB License
+# KiCAD Schematics and PCB license CERN-OHL-S v2
 
 This source describes Open Hardware and is licensed under the CERN-OHL-S v2.
 
