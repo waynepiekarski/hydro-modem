@@ -106,6 +106,8 @@ void setup() {
     pinMode(ERROR_PIN, OUTPUT);
     digitalWrite(SCOPE_PIN, 0);
     digitalWrite(ERROR_PIN, 0);
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
 
 #ifdef INTERRUPT_HANDLER
     // Calculate OCR1A value for Timer1 (16-bit)
@@ -259,6 +261,17 @@ unsigned long last_usec = 0;
 uint16_t sample_count = 0;
 
 void loop() {
+// #define DEBUG_LOOP
+#ifdef DEBUG_LOOP
+    unsigned long last_blink = 0;
+    if ((millis() - last_blink) > 1000) {
+        Serial.println("DEBUG");
+        Serial.println(millis());
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+        last_blink = millis();
+    }
+#endif // DEBUG_LOOP
+
 #ifndef INTERRUPT_HANDLER
     // If there is no interrupt handler, implement the sample rate by checking the timer
     unsigned long now_usec = micros();
