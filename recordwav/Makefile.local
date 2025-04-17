@@ -1,6 +1,6 @@
 # The modem receiver must run on a 16 MHz atmega328p or the CPU isn't fast enough
 # Use fastest baud rate possible to avoid adding delays to tight 4000 Hz loop timing
-PORT=/dev/ttyACM0
-BAUD=1000000
+# recordwav at 1000000 baud was getting corrupted when tested with FTDI USB adapter
+BAUD=500000
 FQBN=arduino:avr:pro:cpu=16MHzatmega328
-OPTIBOOT_BAUD=115200
+OPTIBOOT_BUILD=optiboot_external16
