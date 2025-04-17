@@ -5,8 +5,8 @@ $Descr USLetter 11000 8500
 encoding utf-8
 Sheet 1 1
 Title "HydroModem - Piezo Audio Modem ATmega328p 5V 16MHz"
-Date "2025-03-15"
-Rev "v1"
+Date "2025-04-16"
+Rev "v3"
 Comp "Copyright (C) Wayne Piekarski 2024-2025 - Licensed under CERN-OHL-S v2"
 Comment1 "https://www.waynepiekarski.net/projects/hydro-modem.htm"
 Comment2 ""
@@ -390,8 +390,8 @@ F 3 "~" H 7000 850 50  0001 C CNN
 $EndComp
 Text Notes 5650 3050 0    50   ~ 0
 The modem runs with 5V assuming a regulated supply.\nOnly use 3V3 output UART voltages to protect the other side which runs with 3V3.
-Text Notes 650  5700 0    50   ~ 0
-5-pin female plug to use as a peripheral.\nMust flip here to connect to the UART host.\nCannot be programmed from here without an inverter adapter.
+Text Notes 650  5550 0    50   ~ 0
+5-pin female plug to use as a peripheral only.\nCreate M-M adapter with TX/RX flipped for Arduino upload.
 Text GLabel 5150 2750 0    50   Input ~ 0
 RX5
 Text GLabel 5350 2750 2    50   Input ~ 0
@@ -441,7 +441,7 @@ F 3 "" H 5300 3650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Notes 5650 4300 0    50   ~ 0
-If other side has 10K pullup, then need low-enough resistance to maintain 3V3.\n\nDo not use UART pullups on either side, no noise when connected together. Allows lower power wasted.\n\n5V over 3*1K = 1.67 mA\n5V over 3*10K = 0.167 mA\n\nEstimate is 7mA for atmega328p modem, so 1.67 mA is too high!
+If other side has 10K pullup, then need low-enough resistance to maintain 3V3.\n\nDo not use UART pullups on either side, no noise when connected together. Allows lower power wasted.\n\n5V over 3*1K = 1.67 mA\n5V over 3*10K = 0.167 mA
 Text Notes 5650 2600 0    50   ~ 0
 Incoming 3V3 UART works without conversion
 $Comp
@@ -476,185 +476,419 @@ F 3 "" H 2450 4500 50  0001 C CNN
 $EndComp
 Text Notes 900  4050 0    50   ~ 0
 Use resistor ladder to generate 3V3
-Text Notes 4200 5800 0    50   ~ 0
-https://electronics.stackexchange.com/questions/707747/is-this-a-good-circuit-for-connecting-a-piezo-disc-sensor-to-a-microcontroller
+Text Notes 1350 6150 0    50   ~ 0
+Based on https://www.instructables.com/The-Gladys-Hydrophone/ dual 9V version
 $Comp
 L Device:R R5
 U 1 1 67D0282B
-P 4650 6250
-F 0 "R5" V 4443 6250 50  0000 C CNN
-F 1 "10K" V 4534 6250 50  0000 C CNN
-F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 4580 6250 50  0001 C CNN
-F 3 "~" H 4650 6250 50  0001 C CNN
-	1    4650 6250
-	0    1    1    0   
+P 5400 7100
+F 0 "R5" H 5300 7200 50  0000 C CNN
+F 1 "10K" H 5284 7100 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 5330 7100 50  0001 C CNN
+F 3 "~" H 5400 7100 50  0001 C CNN
+	1    5400 7100
+	-1   0    0    1   
 $EndComp
 $Comp
 L Device:R R7
 U 1 1 67D07C08
-P 5150 6250
-F 0 "R7" V 4943 6250 50  0000 C CNN
-F 1 "10K" V 5034 6250 50  0000 C CNN
-F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 5080 6250 50  0001 C CNN
-F 3 "~" H 5150 6250 50  0001 C CNN
-	1    5150 6250
-	0    1    1    0   
+P 5400 6600
+F 0 "R7" H 5300 6700 50  0000 C CNN
+F 1 "10K" H 5284 6600 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 5330 6600 50  0001 C CNN
+F 3 "~" H 5400 6600 50  0001 C CNN
+	1    5400 6600
+	-1   0    0    1   
 $EndComp
 $Comp
 L Device:R R8
 U 1 1 67D07F8E
-P 5150 7700
-F 0 "R8" V 4943 7700 50  0000 C CNN
-F 1 "10K" V 5034 7700 50  0000 C CNN
-F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 5080 7700 50  0001 C CNN
-F 3 "~" H 5150 7700 50  0001 C CNN
-	1    5150 7700
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R6
-U 1 1 67D082D3
-P 4650 7700
-F 0 "R6" V 4443 7700 50  0000 C CNN
-F 1 "10K" V 4534 7700 50  0000 C CNN
-F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 4580 7700 50  0001 C CNN
-F 3 "~" H 4650 7700 50  0001 C CNN
-	1    4650 7700
+P 4250 7450
+F 0 "R8" V 4043 7450 50  0000 C CNN
+F 1 "10K" V 4134 7450 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 4180 7450 50  0001 C CNN
+F 3 "~" H 4250 7450 50  0001 C CNN
+	1    4250 7450
 	0    1    1    0   
 $EndComp
 $Comp
 L Connector_Generic:Conn_01x02 PIEZO1
 U 1 1 67D0F5A9
-P 4600 7000
-F 0 "PIEZO1" V 4600 6850 50  0000 R CNN
-F 1 "Piezo" V 4700 7050 50  0000 R CNN
-F 2 "custom:WP_PinSocket_1x02_P2.54mm_Vertical" H 4600 7000 50  0001 C CNN
-F 3 "~" H 4600 7000 50  0001 C CNN
-	1    4600 7000
+P 2200 6550
+F 0 "PIEZO1" V 2200 6400 50  0000 R CNN
+F 1 "Piezo" V 2300 6600 50  0000 R CNN
+F 2 "custom:WP_PinSocket_1x02_P2.54mm_Vertical" H 2200 6550 50  0001 C CNN
+F 3 "~" H 2200 6550 50  0001 C CNN
+	1    2200 6550
 	0    -1   -1   0   
 $EndComp
-$Comp
-L pspice:DIODE D1
-U 1 1 67D135C1
-P 4900 6500
-F 0 "D1" V 4946 6372 50  0000 R CNN
-F 1 "1N4007" V 4855 6372 50  0000 R CNN
-F 2 "custom:WP_D_SOD-123" H 4900 6500 50  0001 C CNN
-F 3 "~" H 4900 6500 50  0001 C CNN
-	1    4900 6500
-	0    -1   -1   0   
-$EndComp
-$Comp
-L pspice:DIODE D3
-U 1 1 67D140C7
-P 4900 7450
-F 0 "D3" V 5150 7400 50  0000 R CNN
-F 1 "1N4007" V 5050 7400 50  0000 R CNN
-F 2 "custom:WP_D_SOD-123" H 4900 7450 50  0001 C CNN
-F 3 "~" H 4900 7450 50  0001 C CNN
-	1    4900 7450
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:R R9
-U 1 1 67D0870C
-P 4650 6750
-F 0 "R9" V 4443 6750 50  0000 C CNN
-F 1 "1M" V 4534 6750 50  0000 C CNN
-F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 4580 6750 50  0001 C CNN
-F 3 "~" H 4650 6750 50  0001 C CNN
-	1    4650 6750
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR0104
-U 1 1 67D2C358
-P 5550 7700
-F 0 "#PWR0104" H 5550 7450 50  0001 C CNN
-F 1 "GND" H 5555 7527 50  0000 C CNN
-F 2 "" H 5550 7700 50  0001 C CNN
-F 3 "" H 5550 7700 50  0001 C CNN
-	1    5550 7700
-	1    0    0    -1  
-$EndComp
-Text GLabel 5500 6250 2    50   Input ~ 0
-5V-In
-Text GLabel 5500 6900 2    50   Input ~ 0
+Text GLabel 6000 6850 2    50   Input ~ 0
 ADC0
-Wire Wire Line
-	4500 6250 4450 6250
-Wire Wire Line
-	4450 6250 4450 6750
-Wire Wire Line
-	4450 6750 4500 6750
-Wire Wire Line
-	4450 6750 4450 7200
-Wire Wire Line
-	4450 7200 4600 7200
-Connection ~ 4450 6750
-Wire Wire Line
-	4450 7200 4450 7700
-Wire Wire Line
-	4450 7700 4500 7700
-Connection ~ 4450 7200
-Wire Wire Line
-	4800 7700 4900 7700
-Wire Wire Line
-	4900 7700 4900 7650
-Wire Wire Line
-	4900 7700 5000 7700
-Connection ~ 4900 7700
-Wire Wire Line
-	4900 7250 4900 7200
-Wire Wire Line
-	4800 6750 4900 6750
-Connection ~ 4900 6750
-Wire Wire Line
-	4900 6750 4900 6700
-Wire Wire Line
-	4700 7200 4900 7200
-Connection ~ 4900 7200
-Wire Wire Line
-	4900 6300 4900 6250
-Wire Wire Line
-	4900 6250 4800 6250
-Wire Wire Line
-	4900 6250 5000 6250
-Connection ~ 4900 6250
-Wire Wire Line
-	5300 7700 5550 7700
-Wire Wire Line
-	4900 6750 4900 6900
-Wire Wire Line
-	5500 6250 5300 6250
-Wire Wire Line
-	5500 6900 5350 6900
-Connection ~ 4900 6900
-Wire Wire Line
-	4900 6900 4900 7200
-Text Notes 4200 5900 0    50   ~ 0
-ADC protection circuit from piezo spikes, use 1N4007 and not Schottky
+Text Notes 1350 6350 0    50   ~ 0
+Protection circuit from piezo spikes, use Schottky diodes\nOutput impedance 50 ohm, input impedance 1 Mohm
 Text GLabel 4250 1950 2    50   Input ~ 0
 ADC0
 Wire Wire Line
 	4200 1950 4250 1950
-NoConn ~ 4200 2050
 NoConn ~ 4200 2150
 NoConn ~ 4200 2250
 NoConn ~ 4200 2350
 NoConn ~ 4200 2450
 $Comp
-L Connector_Generic:Conn_01x01 J1
-U 1 1 67D6A912
-P 5350 7100
-F 0 "J1" V 5222 7180 50  0000 L CNN
-F 1 "ADC-Debug" V 5313 7180 50  0000 L CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 5350 7100 50  0001 C CNN
-F 3 "~" H 5350 7100 50  0001 C CNN
-	1    5350 7100
+L Amplifier_Operational:OPA1641 OPA1641
+U 1 1 67FF95DC
+P 4050 6850
+F 0 "OPA1641" H 4050 6850 50  0000 L CNN
+F 1 "OPA1641AQDGKRQ1" H 3650 7150 50  0000 L CNN
+F 2 "Package_SO:VSSOP-8_3.0x3.0mm_P0.65mm" H 4050 6850 50  0001 C CNN
+F 3 "http://www.ti.com/lit/ds/symlink/opa1641.pdf" H 4050 6850 50  0001 C CNN
+	1    4050 6850
+	1    0    0    -1  
+$EndComp
+Text GLabel 4000 6450 2    50   Input ~ 0
+5V-In
+$Comp
+L power:GND #PWR0104
+U 1 1 680016CF
+P 3950 7150
+F 0 "#PWR0104" H 3950 6900 50  0001 C CNN
+F 1 "GND" H 3955 6977 50  0000 C CNN
+F 2 "" H 3950 7150 50  0001 C CNN
+F 3 "" H 3950 7150 50  0001 C CNN
+	1    3950 7150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C3
+U 1 1 68004CCF
+P 5100 6850
+F 0 "C3" V 4848 6850 50  0000 C CNN
+F 1 "22uF" V 4939 6850 50  0000 C CNN
+F 2 "custom:WP_C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 5138 6700 50  0001 C CNN
+F 3 "~" H 5100 6850 50  0001 C CNN
+	1    5100 6850
 	0    1    1    0   
 $EndComp
-Connection ~ 5350 6900
 Wire Wire Line
-	5350 6900 4900 6900
+	4350 6850 4500 6850
+$Comp
+L Device:R R13
+U 1 1 680124F8
+P 3700 7650
+F 0 "R13" H 3600 7750 50  0000 C CNN
+F 1 "1K" H 3584 7650 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 3630 7650 50  0001 C CNN
+F 3 "~" H 3700 7650 50  0001 C CNN
+	1    3700 7650
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	4850 6850 4900 6850
+Wire Wire Line
+	4400 7450 4500 7450
+Wire Wire Line
+	4500 6850 4500 7450
+Wire Wire Line
+	4100 7450 3700 7450
+Wire Wire Line
+	3700 7450 3700 7500
+Wire Wire Line
+	3750 6950 3700 6950
+Wire Wire Line
+	3700 6950 3700 7450
+Connection ~ 3700 7450
+$Comp
+L Device:R R12
+U 1 1 680316A2
+P 3300 6750
+F 0 "R12" V 3050 6750 50  0000 C CNN
+F 1 "1K" V 3184 6750 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 3230 6750 50  0001 C CNN
+F 3 "~" H 3300 6750 50  0001 C CNN
+	1    3300 6750
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3500 6750 3450 6750
+Wire Wire Line
+	3500 6750 3750 6750
+Connection ~ 3500 6750
+Text GLabel 3150 7000 2    50   Input ~ 0
+5V-In
+Wire Wire Line
+	3150 7000 3100 7000
+$Comp
+L Device:R R10
+U 1 1 68045395
+P 2700 6950
+F 0 "R10" H 2600 7050 50  0000 C CNN
+F 1 "1M" H 2584 6950 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 2630 6950 50  0001 C CNN
+F 3 "~" H 2700 6950 50  0001 C CNN
+	1    2700 6950
+	-1   0    0    1   
+$EndComp
+Text GLabel 3750 7900 2    50   Input ~ 0
+Vmid
+Wire Wire Line
+	3750 7900 3700 7900
+Wire Wire Line
+	3700 7800 3700 7900
+$Comp
+L power:GND #PWR0106
+U 1 1 6804B8C6
+P 3100 7750
+F 0 "#PWR0106" H 3100 7500 50  0001 C CNN
+F 1 "GND" H 3105 7577 50  0000 C CNN
+F 2 "" H 3100 7750 50  0001 C CNN
+F 3 "" H 3100 7750 50  0001 C CNN
+	1    3100 7750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3500 6750 3500 7400
+Text GLabel 2650 7200 0    50   Input ~ 0
+Vmid
+Wire Wire Line
+	2650 7200 2700 7200
+Wire Wire Line
+	2700 7200 2700 7100
+Wire Wire Line
+	3150 6750 2700 6750
+Wire Wire Line
+	2700 6750 2700 6800
+Wire Wire Line
+	2300 6750 2700 6750
+Connection ~ 2700 6750
+$Comp
+L power:GND #PWR0110
+U 1 1 6805F0FF
+P 2200 6850
+F 0 "#PWR0110" H 2200 6600 50  0001 C CNN
+F 1 "GND" H 2205 6677 50  0000 C CNN
+F 2 "" H 2200 6850 50  0001 C CNN
+F 3 "" H 2200 6850 50  0001 C CNN
+	1    2200 6850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2200 6850 2200 6750
+Wire Wire Line
+	5400 6750 5400 6850
+Wire Wire Line
+	5400 6850 5250 6850
+Wire Wire Line
+	5400 6850 5400 6950
+Connection ~ 5400 6850
+Text GLabel 5450 6400 2    50   Input ~ 0
+5V-In
+Wire Wire Line
+	5450 6400 5400 6400
+Wire Wire Line
+	5400 6400 5400 6450
+$Comp
+L power:GND #PWR0111
+U 1 1 6808701B
+P 5400 7300
+F 0 "#PWR0111" H 5400 7050 50  0001 C CNN
+F 1 "GND" H 5405 7127 50  0000 C CNN
+F 2 "" H 5400 7300 50  0001 C CNN
+F 3 "" H 5400 7300 50  0001 C CNN
+	1    5400 7300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5400 7300 5400 7250
+Text GLabel 1700 6950 2    50   Input ~ 0
+5V-In
+Text GLabel 750  7300 0    50   Input ~ 0
+Vmid
+$Comp
+L Device:R R6
+U 1 1 680A002F
+P 800 7100
+F 0 "R6" H 700 7200 50  0000 C CNN
+F 1 "47K" H 684 7100 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 730 7100 50  0001 C CNN
+F 3 "~" H 800 7100 50  0001 C CNN
+	1    800  7100
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R9
+U 1 1 680A0A1D
+P 800 7500
+F 0 "R9" H 700 7600 50  0000 C CNN
+F 1 "47K" H 684 7500 50  0000 C CNN
+F 2 "custom:WP_R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" V 730 7500 50  0001 C CNN
+F 3 "~" H 800 7500 50  0001 C CNN
+	1    800  7500
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	800  7250 800  7300
+Wire Wire Line
+	800  7300 750  7300
+Wire Wire Line
+	800  7300 800  7350
+Connection ~ 800  7300
+$Comp
+L power:GND #PWR0112
+U 1 1 680AC7F1
+P 1200 7700
+F 0 "#PWR0112" H 1200 7450 50  0001 C CNN
+F 1 "GND" H 1205 7527 50  0000 C CNN
+F 2 "" H 1200 7700 50  0001 C CNN
+F 3 "" H 1200 7700 50  0001 C CNN
+	1    1200 7700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1200 7700 1200 7650
+Wire Wire Line
+	1200 7650 800  7650
+$Comp
+L Device:C C2
+U 1 1 680A13E2
+P 1700 7300
+F 0 "C2" H 1650 7400 50  0000 C CNN
+F 1 "0.1uF" H 1500 7300 50  0000 C CNN
+F 2 "custom:WP_C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 1738 7150 50  0001 C CNN
+F 3 "~" H 1700 7300 50  0001 C CNN
+	1    1700 7300
+	-1   0    0    1   
+$EndComp
+Connection ~ 1200 7650
+$Comp
+L Device:C C1
+U 1 1 680A1DA2
+P 1200 7500
+F 0 "C1" H 1150 7600 50  0000 C CNN
+F 1 "22uF" H 1000 7500 50  0000 C CNN
+F 2 "custom:WP_C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 1238 7350 50  0001 C CNN
+F 3 "~" H 1200 7500 50  0001 C CNN
+	1    1200 7500
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1200 7350 1200 7300
+Wire Wire Line
+	1200 7300 800  7300
+$Comp
+L power:GND #PWR0113
+U 1 1 680D9BCB
+P 1700 7700
+F 0 "#PWR0113" H 1700 7450 50  0001 C CNN
+F 1 "GND" H 1705 7527 50  0000 C CNN
+F 2 "" H 1700 7700 50  0001 C CNN
+F 3 "" H 1700 7700 50  0001 C CNN
+	1    1700 7700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	800  6950 1700 6950
+Wire Wire Line
+	1700 7700 1700 7450
+Wire Wire Line
+	1700 7150 1700 6950
+Text Notes 5050 5950 0    50   ~ 0
+https://electronics.stackexchange.com/questions/625058/safely-connect-audio-line-level-input-to-adc\nLine-In example similar except used 10 uF capacitor and 100K resistor divider
+$Comp
+L Connector_Generic:Conn_01x02 LINE1
+U 1 1 6812DCFB
+P 4800 6150
+F 0 "LINE1" V 4800 6000 50  0000 R CNN
+F 1 "LineIn" V 4900 6200 50  0000 R CNN
+F 2 "custom:WP_PinSocket_1x02_P2.54mm_Vertical" H 4800 6150 50  0001 C CNN
+F 3 "~" H 4800 6150 50  0001 C CNN
+	1    4800 6150
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Jumper:SolderJumper_2_Open EN1
+U 1 1 6814534F
+P 4700 6850
+F 0 "EN1" H 4700 7055 50  0000 C CNN
+F 1 "LineInJumper" H 4700 6964 50  0000 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" H 4700 6850 50  0001 C CNN
+F 3 "~" H 4700 6850 50  0001 C CNN
+	1    4700 6850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4200 2050
+Wire Wire Line
+	4900 6350 4900 6850
+Connection ~ 4900 6850
+Wire Wire Line
+	4900 6850 4950 6850
+$Comp
+L power:GND #PWR0115
+U 1 1 68186CD1
+P 4800 6350
+F 0 "#PWR0115" H 4800 6100 50  0001 C CNN
+F 1 "GND" H 4805 6177 50  0000 C CNN
+F 2 "" H 4800 6350 50  0001 C CNN
+F 3 "" H 4800 6350 50  0001 C CNN
+	1    4800 6350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4550 6850 4500 6850
+Connection ~ 4500 6850
+$Comp
+L Connector_Generic:Conn_01x02 ADC1
+U 1 1 681A860E
+P 5850 6200
+F 0 "ADC1" V 5850 6050 50  0000 R CNN
+F 1 "ADC-Debug" V 5950 6250 50  0000 R CNN
+F 2 "custom:WP_PinSocket_1x02_P2.54mm_Vertical" H 5850 6200 50  0001 C CNN
+F 3 "~" H 5850 6200 50  0001 C CNN
+	1    5850 6200
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	5400 6850 5950 6850
+Wire Wire Line
+	5950 6400 5950 6850
+Connection ~ 5950 6850
+Wire Wire Line
+	5950 6850 6000 6850
+$Comp
+L power:GND #PWR0116
+U 1 1 681B1202
+P 5850 6400
+F 0 "#PWR0116" H 5850 6150 50  0001 C CNN
+F 1 "GND" H 5855 6227 50  0000 C CNN
+F 2 "" H 5850 6400 50  0001 C CNN
+F 3 "" H 5850 6400 50  0001 C CNN
+	1    5850 6400
+	1    0    0    -1  
+$EndComp
+Text Notes 4450 7950 0    50   ~ 0
+KGM21AR51E226MU\nKYOCERA AVX\nCAP CER 22UF 25V X5R 0805\nRuns at 2.5V which is 10% of 25V capacity\nX5R is approx same as X7R but 85C vs 125C
+Wire Wire Line
+	3950 6550 3950 6450
+Wire Wire Line
+	3950 6450 4000 6450
+Text Notes 4500 7100 0    50   ~ 0
+Solder to use OpAmp\nDesolder for Line-In
+$Comp
+L Diode:BAS40-04 BAS4004
+U 1 1 6800584C
+P 3200 7400
+F 0 "BAS4004" V 3246 7587 50  0000 L CNN
+F 1 "BAS40-04" V 3155 7587 50  0000 L CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 2950 7700 50  0001 L CNN
+F 3 "http://www.vishay.com/docs/85701/bas40v.pdf" H 3080 7500 50  0001 C CNN
+	1    3200 7400
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3300 7400 3500 7400
+Wire Wire Line
+	3100 7000 3100 7100
+Wire Wire Line
+	3100 7700 3100 7750
+Text Notes 2050 7750 0    50   ~ 0
+BAS40-04\nDIODE ARR SCHOTT 40V 200MA SOT23
 $EndSCHEMATC
