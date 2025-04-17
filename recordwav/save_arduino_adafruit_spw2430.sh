@@ -14,6 +14,6 @@ set -xve
 # Needs massive gain of 2048 to hear anything and is very noisy
 
 SAMPLE_RATE=4000
-timeout 10s make read | grep "^[0-9A-F][0-9A-F][0-9A-F]$" > out.hex
+timeout 10s make read | grep --text "^[0-9A-F][0-9A-F][0-9A-F]$" > out.hex
 python3 ./ascii_to_wav.py out.hex ${OUTWAV} ${SAMPLE_RATE} 171 2048
 ../../modem/bell103_goertzel_wav_decoder ${OUTWAV} "TEST" 10 ${SAMPLE_RATE}
