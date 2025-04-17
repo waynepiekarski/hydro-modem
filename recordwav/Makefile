@@ -7,13 +7,13 @@ ifeq ($(FQBN),)
 endif
 BUILD_DIR=build
 
-# The standard Arduino Uno board at 16 MHz 5V uses 115200 for the bootloader, while my custom 8 MHz 3.3V board uses 57600 for better UART reliability
+# The standard Arduino Uno board at 16 MHz 5V uses 115200 for the Arduino bootloader
+# All my custom boards use Optiboot bootloader and 57600 for better UART reliability
 ifeq ($(OPTIBOOT_BAUD),)
 OPTIBOOT_BAUD=57600
+OPTIBOOT_BUILD=optiboot_external8
 endif
 OUTFILE=$(BUILD_DIR)/$(NAME).ino.hex
-# By default use an 8 MHz external crystal configuration when using Optiboot, but not for Arduino Uno
-OPTIBOOT_BUILD=atmega328_external8_isp
 
 
 all:	$(OUTFILE)
@@ -58,30 +58,50 @@ clean:
 #
 # We use OptiBoot v6.2 which supports the watchdog and software reset, whereas the
 # standard Arduino bootloader does not work for this. OptiBoot also uses only 512 bytes
-# so this needs to be confisued in the fuses as well. The OptiBoot Makefile and
+# so this needs to be configured in the fuses as well. The OptiBoot Makefile and
 # Makefile.isp implement all of the fuses and flashing.
-optiboot:
-	$(MAKE) -C $(CURDIR)/../optiboot/optiboot/bootloaders/optiboot $(OPTIBOOT_BUILD)
+optiboot:	$(OPTIBOOT_BUILD)
+
+optiboot_external8:
+	$(MAKE) -C $(CURDIR)/../optiboot/optiboot/bootloaders/optiboot atmega328_external8_isp
+
+optiboot_external16:
+	$(MAKE) -C $(CURDIR)/../optiboot/optiboot/bootloaders/optiboot atmega328_external16_isp
+
+optiboot_external7:
+	$(MAKE) -C $(CURDIR)/../optiboot/optiboot/bootloaders/optiboot atmega328_external_7372800_isp
+
+
+# Lookup any port and baud rate information for this project
+UPPER=$(shell echo $(NAME) | tr '[:lower:]' '[:upper:]' | tr '-' '_' | awk -F'_' '{ print $$1 }')
+# Split the project name before any hyphens and just use the first part for any variable names
+ifeq ($(PORT),)
+PORT=$(shell ../../get_config_var $(UPPER)_SERIAL_DEVICE)
+ifneq ($(PORT),)
+$(warning Lookup name [$(NAME)] -> [$(UPPER)], port $(UPPER)_SERIAL_DEVICE=$(PORT))
+endif
+endif
+
+ifeq ($(BAUD),)
+BAUD=$(shell ../../get_config_var $(UPPER)_SERIAL_BAUD)
+ifneq ($(PORT),)
+$(warning Lookup name [$(NAME)] -> [$(UPPER)], baud $(UPPER)_SERIAL_BAUD=$(BAUD))
+endif
+endif
+
+ifeq ($(PORT),)
+PORT := $(shell if [ -c /dev/ttyUSB0 ]; then echo /dev/ttyUSB0; elif [ -c /dev/ttyACM0 ]; then echo /dev/ttyACM0; else echo "/dev/no-ttyUSB0-or-ttyACM0-found"; fi)
+$(warning Automatic detection of upload PORT=$(PORT))
+endif
+
+ifeq ($(BAUD),)
+$(error No $(UPPER)_SERIAL_BAUD defined)
+endif
 
 # Upload the binary via the serial port, assuming bootloader is already flashed. No need to unplug the device and use AVRISP adapter.
 # Need to power cycle the device and this should then catch it during the OptiBoot startup when the lights are blinking
 # After modifying sensorhub's startup to re-run the bootloader, it now properly waits for stk500 commands on power up,
 # so you can now power cycle and upload again like before with the Arduino bootloader.
-UPPER=$(shell echo $(NAME) | tr '[:lower:]' '[:upper:]' | tr '-' '_' | awk -F'_' '{ print $$1 }')
-# Split the project name before any hyphens and just use the first part for any variable names
-ifeq ($(PORT),)
-PORT=$(shell ../../get_config_var $(UPPER)_SERIAL_DEVICE)
-endif
-ifeq ($(BAUD),)
-BAUD=$(shell ../../get_config_var $(UPPER)_SERIAL_BAUD)
-endif
-$(warning Using name [$(NAME)] -> [$(UPPER)], port $(UPPER)_SERIAL_DEVICE=$(PORT) and baud $(UPPER)_SERIAL_BAUD=$(BAUD))
-ifeq ($(PORT),)
-$(error No $(UPPER)_SERIAL_DEVICE defined)
-endif
-ifeq ($(BAUD),)
-$(error No $(UPPER)_SERIAL_BAUD defined)
-endif
 AVRDUDE=$(CURDIR)/../arduino-data-$(ARCH)-dir/packages/arduino/tools/avrdude/6.3.0-arduino17/bin/avrdude
 AVRDUDE_CONF=$(CURDIR)/../arduino-data-$(ARCH)-dir/packages/arduino/tools/avrdude/6.3.0-arduino17/etc/avrdude.conf
 # Note that -carduino is required, -cstk500 does not work with Optiboot. Arduino uses a variant of STK500 but not compatible.
@@ -110,28 +130,8 @@ arduino-uno-upload:
 	$(MAKE) clean
 	$(MAKE) OPTIBOOT_BAUD=115200 FQBN=arduino:avr:pro:cpu=16MHzatmega328 upload
 
-
-# BOOTLOADER command requires OptiBoot for working watchdog support, and it can software reboot the ATmega328
-# and then upload without any kind of physical activity like pressing a button, flicking a switch, or DTR line.
-# The reboot actually happens immediately at BOOTLOADER,Now so avrdude needs to run during the time the chip
-# is in the bootloader and before it starts running the SensorHub code.
-reboot:
-	stty raw -crtscts -echo ispeed $(BAUD) ospeed $(BAUD) -F $(PORT)
-	/bin/echo -e '$$BOOTLOADER*07\n\r' > $(PORT)
-	/bin/echo -e '$$BOOTLOADER*07\n\r' > $(PORT)
-	/bin/echo -e '$$BOOTLOADER*07\n\r' > $(PORT)
-
-autoupload: $(OUTFILE)
-	make -C $(CURDIR) reboot
-	timeout 5s cat $(PORT) || true
-	make -C $(CURDIR) upload
-
-# Use GPIO 20 to toggle the Arduino !RESET line to enter bootloader mode, requires sudo access
-gpioupload: $(OUTFILE)
-	$(CURDIR)/../../testing/gpio-uart-arduino-reset.sh
-	make -C $(CURDIR) upload
-
-# Directly flash to the hardware via the AVRISP connector, skipping OptiBoot and no ability to update via UART
-# Arguments for the fuses are copied from the optiboot Makefile to be consistent
+# Directly flash to the hardware via the AVRISP connector, skipping OptiBoot and no ability to update via UART.
+# Fuses must be consistent with the optiboot Makefile *_isp rules.
+# Requires the PCB to have an external oscillator, fuses are the same for all frequencies.
 flash: $(OUTFILE)
 	sudo $(AVRDUDE) -C$(AVRDUDE_CONF) -patmega328p -c usbasp -e -u -U lock:w:0xff:m -U efuse:w:0xFD:m -U hfuse:w:0xDE:m -U lfuse:w:0xF7:m -U flash:w:$(OUTFILE) -U lock:w:0xcf:m
