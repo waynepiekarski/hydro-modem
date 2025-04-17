@@ -36,7 +36,7 @@
 // Attach MAX4466 microphone to analog pin 0 to read audio from the ADC
 #define ANALOG_PIN PIN_A0
 // Attach oscilloscope to digital pin 7 to see pulse at the start and end of interrupt handler
-#define SCOPE_PIN  7
+#define SCOPE_PIN  LED_BUILTIN
 #endif // __AVR__
 
 #include "modem-const.h"
@@ -91,11 +91,13 @@ void loop() {
         digitalWrite(SCOPE_PIN, 1);
         sample();
         digitalWrite(SCOPE_PIN, 0);
+#ifndef GRAPHICAL_DEBUG
         unsigned long used_usec = micros()-now_usec;
         if (used_usec > SAMPLE_USEC) {
             Serial.print("TIMEOUT ");
             Serial.println(used_usec);
         }
+#endif // !GRAPHICAL_DEBUG
         last_usec = now_usec;
     }
 }
