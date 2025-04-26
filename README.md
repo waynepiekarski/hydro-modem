@@ -66,11 +66,11 @@ The recordwav.ino project allows you to listen to or record the audio at the ADC
 # Build and upload the recordwav project via USB serial to record from the ADC
 make -C recordwav upload
 
-# Save audio to disk for offline testing, adjust gain and center for SparkFun SPH8878 microphone
-./recordwav/save_arduino_sparkfun_sph8878.sh
+# Save audio to disk for offline testing
+./recordwav/save_arduino_piezo.sh
 
-# Listen to live audio on speakers, adjust audio gain and center for SparkFun SPH8878 microphone
-./recordwav/live_arduino_sparkfun_sph8878.sh
+# Listen to live audio on speakers
+./recordwav/live_arduino_piezo.sh
 ```
 
 
@@ -98,32 +98,36 @@ make -C linux-test test
 ```
 
 
-# Connecting a microphone or hydrophone
-
-This is currently the software needed to read audio from the ADC pin on an Arduino Uno. Currently it is easiest
-to test by connecting a microphone like the SparkFun SPH8878 and testing it in air listening to the sample audio
-from a phone transmitter. Once this is working, you then need to connect a hydrophone to the ADC pin. The design
-of a suitable hydrophone and how to connect it is future work. Make sure that your microphone does not exceed the
-voltage specs of the Arduino ADC.
-
-
 # KiCAD v5 schematics and PCB layouts
 
-These designs need to be built and tested. The modem also needs to be tested in water and frequencies tuned for best performance.
+These designs need to be tested in water and frequencies tuned for best performance.
 Full project files are provided, including .kicad_pcb files for fabrication at <a href="https://oshpark.com">oshpark.com</a>.
 
 ## kicad/release-modem-atmega328p/
 
 5V ATmega328P running at 16 MHz. Requires regulated 5V provided by the other board. Connects to
-a piezo-based microphone and includes protection diodes. Only runs the HydroModem implementation and nothing else.
+a piezo-based microphone and includes protection diodes and an OPA1641 op-amp based on the <a href="https://www.instructables.com/The-Gladys-Hydrophone/">Gladys Hydrophone by DJJules</a>. Only runs the HydroModem implementation and nothing else due to the lack of any spare CPU cycles.
 Arduino Uno-compatible AVRISP6 connector for programming.
 
-<a href="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1"><img src="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1" width="271" height="181"></a>
-<a href="kicad/release-modem-atmega328p/release-modem-atmega328p-col-front.png?raw=1"><img src="kicad/release-modem-atmega328p/release-modem-atmega328p-col-front.png?raw=1" width="271" height="182"></a>
+<a href="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1"><img src="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1" width="340" height="181"></a>
+<a href="kicad/release-modem-atmega328p/release-modem-atmega328p-col-front.png?raw=1"><img src="kicad/release-modem-atmega328p/release-modem-atmega328p-col-front.png?raw=1" width="340" height="181"></a>
 
 <a href="kicad/release-modem-atmega328p/release-modem-atmega328p-schematic.pdf?raw=1">Schematics PDF</a>
 
 <a href="kicad/release-modem-atmega328p/design.kicad_pcb?raw=1">kicad_pcb</a>
+
+
+## kicad/release-modem-atmega328p-linein/
+
+This is a simplified PCB design that does not provide any amplification for a piezo. It connects
+any microphone that has been amplified to line-in voltages (+/- 1V) and passes this through to the ADC.
+
+<a href="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-back.png?raw=1"><img src="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-back.png?raw=1" width="281" height="181"></a>
+<a href="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-front.png?raw=1"><img src="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-front.png?raw=1" width="281" height="181"></a>
+
+<a href="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-schematic.pdf?raw=1">Schematics PDF</a>
+
+<a href="kicad/release-modem-atmega328p-linein/design.kicad_pcb?raw=1">kicad_pcb</a>
 
 
 ## kicad/release-serial-i2c-atmega328p-switch/
