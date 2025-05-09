@@ -27,12 +27,13 @@
 #define PIN_STATUS_LED 13 // PB5, SCK, standard Arduino Uno LED
 static_assert(PIN_STATUS_LED == LED_BUILTIN);
 
+// Manual trigger of the release mechanism, short pin to ground
 #define PIN_INPUT A0 // ADC0 pin can be analog or digital input for a trigger
-
+// MOSFET release is located on PC1, physical pin 24
 #define PIN_MOSFET 15 // PC1, physical pin 24
-
-#define MANUAL_TRIGGER_MSEC 500
-
+// Milliseconds the user must short the manual trigger wires before release
+#define MANUAL_TRIGGER_MSEC 3000
+// Milliseconds to activate the MOSFET for the release burn
 #define WAKE_ACTIVE_MSEC 1000
 
 char wake_word[] = "WAKE";
@@ -131,7 +132,7 @@ void loop()
         }
     } else {
         // Trigger is the same state, so lets wait to see if the press is long enough
-        if ((millis() - last_trigger_time) > 3000) {
+        if ((millis() - last_trigger_time) > MANUAL_TRIGGER_MSEC) {
             Serial.println(millis());
             if (trigger_current) {
                 if (trigger_state == false) {
