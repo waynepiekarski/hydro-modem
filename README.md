@@ -103,10 +103,30 @@ make -C linux-test test
 These designs need to be tested in water and frequencies tuned for best performance.
 Full project files are provided, including .kicad_pcb files for fabrication at <a href="https://oshpark.com">oshpark.com</a>.
 
+## kicad/release-modem-mosfet-atmega328p-piezo/
+
+Combination design implementing both the modem and the release mechanism.
+5V ATmega328P running at 16 MHz.
+Connects to a piezo-based microphone and includes protection diodes and an OPA1641 op-amp based on the
+<a href="https://www.instructables.com/The-Gladys-Hydrophone/">Gladys Hydrophone by DJJules</a>.
+Implements a P-channel MOSFET that can switch high-current 30 amps briefly to burn a nichrome release wire under water.
+Provides on-board MCP1792 regulator for 5V from a >= 6.2V battery.
+Arduino Uno-compatible AVRISP6 connector for programming.
+
+<a href="kicad/release-modem-mosfet-atmega328p-piezo/release-modem-mosfet-atmega328p-piezo-col-back.png?raw=1"><img src="kicad/release-modem-mosfet-atmega328p-piezo/release-modem-mosfet-atmega328p-piezo-col-back.png?raw=1" width="340" height="292"></a>
+<a href="kicad/release-modem-mosfet-atmega328p-piezo/release-modem-mosfet-atmega328p-piezo-col-front.png?raw=1"><img src="kicad/release-modem-mosfet-atmega328p-piezo/release-modem-mosfet-atmega328p-piezo-col-front.png?raw=1" width="340" height="292"></a>
+
+<a href="kicad/release-modem-mosfet-atmega328p-piezo/release-modem-mosfet-atmega328p-piezo-schematic.pdf?raw=1">Schematics PDF</a>
+
+<a href="kicad/release-modem-mosfet-atmega328p-piezo/design.kicad_pcb?raw=1">kicad_pcb</a>
+
+
 ## kicad/release-modem-atmega328p/
 
-5V ATmega328P running at 16 MHz. Requires regulated 5V provided by the other board. Connects to
-a piezo-based microphone and includes protection diodes and an OPA1641 op-amp based on the <a href="https://www.instructables.com/The-Gladys-Hydrophone/">Gladys Hydrophone by DJJules</a>. Only runs the HydroModem implementation and nothing else due to the lack of any spare CPU cycles.
+5V ATmega328P running at 16 MHz. Requires regulated 5V provided by the other board.
+Connects to a piezo-based microphone and includes protection diodes and an OPA1641 op-amp based on the
+<a href="https://www.instructables.com/The-Gladys-Hydrophone/">Gladys Hydrophone by DJJules</a>.
+Only runs the HydroModem implementation, was used for early testing and separate from the release mechanism.
 Arduino Uno-compatible AVRISP6 connector for programming.
 
 <a href="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1"><img src="kicad/release-modem-atmega328p/release-modem-atmega328p-col-back.png?raw=1" width="340" height="181"></a>
@@ -119,8 +139,9 @@ Arduino Uno-compatible AVRISP6 connector for programming.
 
 ## kicad/release-modem-atmega328p-linein/
 
-This is a simplified PCB design that does not provide any amplification for a piezo. It connects
-any microphone that has been amplified to line-in voltages (+/- 1V) and passes this through to the ADC.
+This is a simplified PCB design that does not provide any amplification for a piezo.
+It connects any microphone that has been amplified to line-in voltages (+/- 1V) and passes this through to the ADC.
+Only runs the HydroModem implementation and no release mechanism.
 
 <a href="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-back.png?raw=1"><img src="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-back.png?raw=1" width="281" height="181"></a>
 <a href="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-front.png?raw=1"><img src="kicad/release-modem-atmega328p-linein/release-modem-atmega328p-linein-col-front.png?raw=1" width="281" height="181"></a>
@@ -134,7 +155,7 @@ any microphone that has been amplified to line-in voltages (+/- 1V) and passes t
 
 3.3V ATmega328P running at 8 MHz. Implements a MOSFET that can switch high-current to burn a nichrome release wire.
 Provides on-board MCP1792 regulators for 3.3V and 5V from a >= 6.2V battery. Arduino Uno-compatible AVRISP6 connector
-for programming.
+for programming. Works with either of the standalone modem implementations above.
 
 <a href="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-back.png?raw=1"><img src="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-back.png?raw=1" width="459" height="193"></a>
 <a href="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-front.png?raw=1"><img src="kicad/release-serial-i2c-atmega328p-switch/release-serial-i2c-atmega328p-switch-col-front.png?raw=1" width="459" height="193"></a>
