@@ -33,12 +33,28 @@
 #endif // __AVR__
 
 #ifdef __AVR__
-// Attach MAX4466 microphone to analog pin 0 to read audio from the ADC
-#define ANALOG_PIN PIN_A0
-// Attach oscilloscope to digital pin 7 to see pulse at the start and end of interrupt handler
+#define PIN_STATUS_LED 13 // PB5, SCK, standard Arduino Uno LED, physical 17)
+static_assert(PIN_STATUS_LED == LED_BUILTIN);
+
+// Attach piezo microphone to analog pin 0 to read audio from the ADC (pin 14 = A0 = PC0 = physical 23)
+#define ANALOG_PIN A0
+static_assert(ANALOG_PIN == 14);
+// Attach oscilloscope to digital pin 7 to see pulse at the start and end of interrupt handler (digital pin 7 = PD7 = physical 11)
 #define SCOPE_PIN  7
-// Second oscilloscope pin which toggles if a sample has taken too long
+// Second oscilloscope pin which toggles if a sample has taken too long (digital pin 6 = PD6 = physical 10)
 #define ERROR_PIN  6
+// Manual trigger of the release mechanism, short pin to ground (pin 16 = A2 = PC2 = physical 25)
+#define PIN_TRIGGER A2
+static_assert(PIN_TRIGGER == 16);
+// MOSFET release (pin 15 = A1 = PC1 = physical 24)
+#define PIN_MOSFET 15
+static_assert(PIN_TRIGGER != PIN_MOSFET);
+static_assert(PIN_TRIGGER != ANALOG_PIN);
+static_assert(PIN_MOSFET != ANALOG_PIN);
+// Milliseconds the user must short the manual trigger wires before release
+#define MANUAL_TRIGGER_MSEC 3000
+// Milliseconds to activate the MOSFET for the release burn
+#define WAKE_ACTIVE_MSEC 1000
 #endif // __AVR__
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -52,6 +68,8 @@
 #endif // MAKEFILE_BAUD
 
 #include "modem-const.h"
+
+char wake_word[] = "WAKE";
 
 // Only enable one of these at a time, cannot measure time in interrupt handlers
 // #define BENCHMARKING
@@ -76,6 +94,16 @@ inline void emit_bit(bool) {
     // Only used on Linux for debugging
 }
 
+char *wake_ptr = wake_word;
+
+void trigger_mosfet (void) {
+    Serial.println("MOSFET ON-WAIT");
+    digitalWrite(PIN_MOSFET, HIGH);
+    delay(WAKE_ACTIVE_MSEC);
+    Serial.println("MOSFET OFF");
+    digitalWrite(PIN_MOSFET, LOW);
+}
+
 void emit_goertzel(char out) {
     (void)(out); // Tell compiler it is ok to be unused
 
@@ -91,6 +119,80 @@ void emit_goertzel(char out) {
     } else {
         Serial.print('?');
     }
+
+    // Implement optional wake word detector
+    if (out == *wake_ptr) {
+        // Match, go to the next
+        wake_ptr++;
+    } else {
+        // No match, so reset to the start
+        wake_ptr = wake_word;
+    }
+    // Does the wake word match yet?
+    if (*wake_ptr == '\0') {
+        Serial.println ("");
+        Serial.println ("Wake word detected");
+        trigger_mosfet();
+        wake_ptr = wake_word;
+    }
+
+    // Invert the LED to show a char was processed
+    // Done in a loop to burn spare CPU time and look to see how much remains
+    // Do this an odd number of times otherwise you won't observe the LED change
+    // Currently this can be set to 8 without triggering a timeout
+    for (uint8_t i = 0; i < 7; i++) {
+        bool value = digitalRead(LED_BUILTIN);
+        digitalWrite(LED_BUILTIN, !value);
+    }
+
+    // Implement the manual release detection
+    
+    // Wires open is 1, shorted/conducting is 0
+    bool trigger_current = !digitalRead(PIN_TRIGGER);
+    static unsigned long last_trigger_time = 0;
+    static unsigned long last_trigger_current = 0;
+    static bool trigger_state = false;
+    // Initialize static variables
+    if (last_trigger_time == 0) {
+        last_trigger_time = millis();
+        last_trigger_current = trigger_current;
+        trigger_state = false;
+    }
+
+    if (last_trigger_current != trigger_current) {
+        // Trigger changed state, so restart the clock
+        last_trigger_time = millis();
+        last_trigger_current = trigger_current;
+        if (trigger_current) {
+            // Serial.println("Trigger pin change to pressed");
+        } else {
+            // Serial.println("Trigger pin change to released");
+        }
+    } else {
+        // Trigger is the same state, so lets wait to see if the press is long enough
+        if ((millis() - last_trigger_time) > MANUAL_TRIGGER_MSEC) {
+            // Serial.println(millis());
+            if (trigger_current) {
+                if (trigger_state == false) {
+                    Serial.println("Manual trigger detected");
+                    trigger_mosfet();
+                    // Prevent trigger happening again until it is released
+                    trigger_state = true;
+                } else {
+                    // Serial.println("Manual trigger ignored until release state change");
+                }
+            } else {
+                if (trigger_state == true) {
+                    // Serial.println("Release trigger, state changed");
+                    trigger_state = false;
+                } else {
+                    // Serial.println("Ignoring existing trigger release");
+                }
+            }
+            last_trigger_time = millis();
+        }
+    }
+
 }
 
 // Ignore debug printing
@@ -144,6 +246,8 @@ void setup() {
     Serial.println(SAMPLE_USEC);
     Serial.print("SAMPLES_PER_BAUD=");
     Serial.println(SAMPLES_PER_BAUD);
+    Serial.print("WAKE_WORD=");
+    Serial.println(wake_word);
 }
 
 void sample() {
@@ -290,6 +394,7 @@ void loop() {
             // char message like '123' there are 3*10=30 bits. We have drifted by 30/400=7.5%
             // but still less that one tenth of a window. We need to eventually deal with
             // this problem to prevent drift for longer messages.
+#define VERBOSE_DEBUG
 #ifdef VERBOSE_DEBUG
             Serial.print("sample() took too long ");
             Serial.print(used_usec-now_usec);
