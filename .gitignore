@@ -1,4 +1,5 @@
-/modemrx/build
+/*/build
+/build
 /arduino-*
 /linux-test/.temp/
 /linux-test/bell103-goertzel-decoded.csv
