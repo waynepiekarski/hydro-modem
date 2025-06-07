@@ -27,13 +27,15 @@ tar -xvf arduino-cli_0.13.0_Linux_32bit.tar.gz -z arduino-cli && mv arduino-cli 
 
 ./run-arduino-cli core install arduino:avr@1.8.3
 
-# Copy over patches to the Wire library to alternative architectures
-if [ -d arduino-data-armv7l-dir ]; then
+# Copy over patches to the Wire library to alternative architectures if they exist
+if [ -d arduino-data-x86_64-dir ]; then
+  if [ -d arduino-data-armv7l-dir ]; then
     cp arduino-data-x86_64-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/Wire.* arduino-data-armv7l-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/
-fi
-if [ -d arduino-data-aarch64-dir ]; then
-  cp arduino-data-x86_64-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/Wire.* arduino-data-aarch64-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/
-fi
-if [ -d arduino-data-i686-dir ]; then
-  cp arduino-data-x86_64-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/Wire.* arduino-data-i686-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/
+  fi
+  if [ -d arduino-data-aarch64-dir ]; then
+    cp arduino-data-x86_64-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/Wire.* arduino-data-aarch64-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/
+  fi
+  if [ -d arduino-data-i686-dir ]; then
+    cp arduino-data-x86_64-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/Wire.* arduino-data-i686-dir/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src/
+  fi
 fi
