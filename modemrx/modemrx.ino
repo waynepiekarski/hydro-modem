@@ -120,13 +120,19 @@ void emit_goertzel(char out) {
         Serial.print('?');
     }
 
-    // Implement optional wake word detector
+    // Implement wake word detector
     if (out == *wake_ptr) {
-        // Match, go to the next
+        // Match, go to the next letter
         wake_ptr++;
+
+        // Enable the LED for a match
+        digitalWrite(LED_BUILTIN, true);
     } else {
         // No match, so reset to the start
         wake_ptr = wake_word;
+
+        // Disable the LED since no match
+        digitalWrite(LED_BUILTIN, false);
     }
     // Does the wake word match yet?
     if (*wake_ptr == '\0') {
@@ -136,6 +142,7 @@ void emit_goertzel(char out) {
         wake_ptr = wake_word;
     }
 
+#ifdef DEBUG_SPARE_CPU
     // Invert the LED to show a char was processed
     // Done in a loop to burn spare CPU time and look to see how much remains
     // Do this an odd number of times otherwise you won't observe the LED change
@@ -144,6 +151,7 @@ void emit_goertzel(char out) {
         bool value = digitalRead(LED_BUILTIN);
         digitalWrite(LED_BUILTIN, !value);
     }
+#endif // DEBUG_SPARE_CPU
 
     // Implement the manual release detection
     
@@ -209,6 +217,7 @@ void setup() {
     digitalWrite(SCOPE_PIN, 0);
     digitalWrite(ERROR_PIN, 0);
     pinMode(LED_BUILTIN, OUTPUT);
+    // Enable the LED initially and will turn off when the next char doesn't match the wake word
     digitalWrite(LED_BUILTIN, HIGH);
 
 #ifdef INTERRUPT_HANDLER
