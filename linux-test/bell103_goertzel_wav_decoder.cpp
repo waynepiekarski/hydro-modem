@@ -150,13 +150,23 @@ int SAMPLE_RATE = -1;
 
 int main(int _argc, const char *_argv[]) {
     // Process any command-line flags and remove them so they don't mess up the indexes of the required arguments
-    bool timing_drop = false;
+    int timing_drop = 0;
     bool disable_shift = false;
     std::vector<const char*> argv;
     for (int i = 0; i < _argc; i++) {
-        if (!strcmp(_argv[i], "--timing-drop")) {
-            fprintf(stderr, "Timing drop mode enabled\n");
-            timing_drop = true;
+        if (strstr(_argv[i], "--timing-drop") == _argv[i]) {
+            const char* equal = strchr(_argv[i],'=');
+            if (equal != NULL) {
+                timing_drop = atoi(equal+1);
+                if (timing_drop < 0) {
+                    fprintf(stderr, "Timing drop argument [%s] is invalid\n", _argv[i]);
+                    exit(1);
+                }
+                fprintf(stderr, "Timing drop mode enabled with value %d\n", timing_drop);
+            } else {
+                timing_drop = 1;
+                fprintf(stderr, "Timing drop mode enabled with default 1\n");
+            }
         } else if (!strcmp(_argv[i], "--disable-shift")) {
             fprintf(stderr, "Disable shift mode\n");
             disable_shift = true;
@@ -167,7 +177,7 @@ int main(int _argc, const char *_argv[]) {
     int argc = argv.size();
 
     if (argc != 5) {
-        fprintf(stderr, "Usage: %s <input_file.wav> <test_string> <baud> <samplerate> [--timing-drop]\n", argv[0]);
+        fprintf(stderr, "Usage: %s <input_file.wav> <test_string> <baud> <samplerate> [--timing-drop|--timing-drop=N]\n", argv[0]);
         return 1;
     }
 
@@ -293,8 +303,8 @@ int main(int _argc, const char *_argv[]) {
                 goertzel_offset = 0;
                 // This function takes too long on an atmega328p, so simulate the loss of the next sample
                 if (timing_drop) {
-                    r++;
-                    fprintf(stderr, "Timing drop simulating loss of sample %d %3.1fs from process_goertzel()\n", sample_offset, sample_offset/(float)SAMPLE_RATE);
+                    r += timing_drop;
+                    fprintf(stderr, "    Timing drop simulating loss +%d of sample %d %3.1fs from process_goertzel()\n", timing_drop, sample_offset, sample_offset/(float)SAMPLE_RATE);
                 }
             } else if ((!disable_shift) && (!reset_is_done) && (waiting_for_start) && (goertzel_offset != 0)) {
                 // Due to how the algorithm works, the offset will never exceed a fraction value, so we can just test
@@ -322,8 +332,8 @@ int main(int _argc, const char *_argv[]) {
                         }
                         // This function takes too long on an atmega328p, so simulate the loss of the next sample
                         if (timing_drop) {
-                            r++;
-                            fprintf(stderr, "Timing drop simulating loss of sample %d %3.1f from get_goertzel_mark_space()\n", sample_offset, sample_offset/(float)SAMPLE_RATE);
+                            r += timing_drop;
+                            fprintf(stderr, "    Timing drop simulating loss +%d of sample %d %3.1f from get_goertzel_mark_space()\n", timing_drop, sample_offset, sample_offset/(float)SAMPLE_RATE);
                         }
                 }
             }
@@ -347,7 +357,15 @@ int main(int _argc, const char *_argv[]) {
         exit(1);
     }
     if (expected != decoded) {
-        fprintf(stderr, "Error: Expected [%s] does not match decoded [%s]\n", expected.c_str(), decoded.c_str());
+        fprintf(stderr, "Error: Expected does not match decoded\nError: Expected %zu=[%s]\nError: Decoded  %zu=[%s]\n", expected.length(), expected.c_str(), decoded.length(), decoded.c_str());
+        size_t i = 0;
+        while((i < expected.length()) && (i < decoded.length())) {
+            if (expected.at(i) != decoded.at(i)) {
+                fprintf(stderr, "Error: Mismatch at 0ofs=%zu 1ofs=%zu, expected [%c] != decoded [%c]\n", i, i+1, expected.at(i), decoded.at(i));
+                break;
+            }
+            i++;
+        }
         exit(1);
     }
     

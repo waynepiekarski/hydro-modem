@@ -4,7 +4,7 @@
 DECODER_ARGS=""
 i=1
 while [[ $i -le $# ]]; do
-    if [[ "${!i}" == "--timing-drop" ]]; then
+    if [[ "${!i}" == --timing-drop* ]]; then
         DECODER_ARGS="$DECODER_ARGS ${!i}"
         shift
     elif [[ "${!i}" == "--disable-shift" ]]; then
