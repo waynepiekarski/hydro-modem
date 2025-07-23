@@ -128,10 +128,13 @@ snd_pcm_t* open_alsa_microphone(const char* alsa_source_name, int samplerate) {
 }
 
 std::string decoded;
+void emit_subtitle (std::string);
+
 void emit_goertzel (unsigned char out) {
     // Filter out junk chars from noise due to testing
     if (char2safe(out) == out) {
         decoded.push_back(out);
+        emit_subtitle(decoded);
     }
 }
 
@@ -147,6 +150,57 @@ int SAMPLE_RATE = -1;
 #define printf_goertzel(...) fprintf(stderr, __VA_ARGS__)
 #define assert_goertzel(...) assert(__VA_ARGS__)
 #include "goertzel_bell103.h"
+
+FILE* subtitle_fp;
+std::string subtitle_path;
+std::string subtitle_last_ts;
+std::string subtitle_last_text;
+uint64_t subtitle_count = 0;
+
+void emit_subtitle (std::string new_text) {
+    if (subtitle_fp == NULL) {
+        return;
+    }
+
+    // Millisecond timestamp of the sample that emitted this
+    uint64_t elapsed_msec = (sample_offset*1000)/SAMPLE_RATE;
+    
+    // Need to keep track of a counter and increment the event integer and timestamp each time
+    // Format information for .SRT files here: https://en.wikipedia.org/wiki/SubRip
+
+    if (subtitle_last_ts.length() == 0) {
+        subtitle_last_ts = "00:00:00,000";
+        subtitle_last_text = new_text;
+        subtitle_count = 0;
+    }
+
+    // The SRT file format has a very specific way of encoding timestamps that we need to reproduce
+    uint64_t msec = elapsed_msec % 1000;
+    uint64_t rem = elapsed_msec / 1000;
+    uint64_t sec = rem % 60;
+    rem /= 60;
+    uint64_t min = rem % 60;
+    rem /= 60;
+    uint64_t hour = rem;
+    char current_tstr[64];
+    sprintf(current_tstr, "%.2lld:%.2lld:%.2lld,%.3lld", hour, min, sec, msec);
+
+    // Need to have a blank line before the next subtitle starts, or VLC will not render the subtitles (but ffmpeg will work)
+    fprintf(subtitle_fp, "%d\n%s --> %s\n%s\n\n", subtitle_count, subtitle_last_ts.c_str(), current_tstr, subtitle_last_text.c_str());
+
+    subtitle_count++;
+    subtitle_last_ts = current_tstr;
+    // Subtitles work from the time right now into an unknown time in the future, so we never print the newText immediately,
+    // but keep it until the next subtitle request flushes out the previous string. This last entry is always lost on any exit.
+    subtitle_last_text = new_text;
+}
+
+void finish_subtitle() {
+    emit_subtitle("");
+    fflush(subtitle_fp);
+    fclose(subtitle_fp);
+    subtitle_fp = NULL;
+}
 
 int main(int _argc, const char *_argv[]) {
     // Process any command-line flags and remove them so they don't mess up the indexes of the required arguments
@@ -167,6 +221,20 @@ int main(int _argc, const char *_argv[]) {
                 timing_drop = 1;
                 fprintf(stderr, "Timing drop mode enabled with default 1\n");
             }
+        } else if (strstr(_argv[i], "--gen-subtitles=") == _argv[i]) {
+            const char* equal = strchr(_argv[i],'=');
+            if (equal != NULL) {
+                subtitle_path = equal+1;
+                fprintf(stderr, "Subtitle generation to path [%s]\n", subtitle_path.c_str());
+                subtitle_fp = fopen(subtitle_path.c_str(), "w");
+                if (subtitle_fp == NULL) {
+                    fprintf(stderr, "Could not open subtitle path [%s] - %s\n", subtitle_path.c_str(), strerror(errno));
+                    exit(1);
+                }
+                emit_subtitle("_"); // Empty subtitle string at start
+            } else {
+                exit(2);
+            }
         } else if (!strcmp(_argv[i], "--disable-shift")) {
             fprintf(stderr, "Disable shift mode\n");
             disable_shift = true;
@@ -177,7 +245,7 @@ int main(int _argc, const char *_argv[]) {
     int argc = argv.size();
 
     if (argc != 5) {
-        fprintf(stderr, "Usage: %s <input_file.wav> <test_string> <baud> <samplerate> [--timing-drop|--timing-drop=N]\n", argv[0]);
+        fprintf(stderr, "Usage: %s <input_file.wav> <test_string> <baud> <samplerate> [--timing-drop|--timing-drop=N] [--gen-subtitles=<path>]\n", argv[0]);
         return 1;
     }
 
@@ -349,6 +417,10 @@ int main(int _argc, const char *_argv[]) {
     sf_close(outfile);
     fclose(csv);
 
+    if (subtitle_fp != NULL) {
+        finish_subtitle();
+    }
+
     // Print out the decoded string for use in shell scripts
     printf("%.f %.f = [%s]\n", diff_total_log10, diff_total, decoded.c_str());
 
@@ -356,7 +428,7 @@ int main(int _argc, const char *_argv[]) {
         fprintf(stderr, "Error: Did not recover any data\n");
         exit(1);
     }
-    if (expected != decoded) {
+    if ((expected.length() != 0) && (expected != decoded)) {
         fprintf(stderr, "Error: Expected does not match decoded\nError: Expected %zu=[%s]\nError: Decoded  %zu=[%s]\n", expected.length(), expected.c_str(), decoded.length(), decoded.c_str());
         size_t i = 0;
         while((i < expected.length()) && (i < decoded.length())) {
