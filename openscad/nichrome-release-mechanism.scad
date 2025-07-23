@@ -20,6 +20,10 @@
 //| source.                                                                      |
 // ------------------------------------------------------------------------------
 
+// Nichrome 80 wire, 32 AWG
+// https://www.amazon.com/dp/B07CJ63YYT
+// Nichrome 80-250' - 32 Gauge Wire - 250ft - 0.2mm - 0.008in - Made in USA - Master Wire Supply
+
 mount_width = 10; // Using 10mm square washers with M3 holes to grab onto the nichrome wire
 wire_length = 10; // Gap between washers for the nichrome wire to burn
 bolt_length = 20;
@@ -37,9 +41,24 @@ arm_thickness = wire_length-2;
 infinity = 100;
 
 for (copy=[-1,1]) scale([copy,1,1]) {
-    // Base
-    translate([0,0,-base/2])
-        cube([width,length,base], center=true);
+    // Base with text
+    if (copy > 0) {
+        difference() {
+            translate([0,0,-base/2])
+                cube([width,length,base], center=true);
+            translate([0,0,-1]) linear_extrude(2) {
+                translate([-6,-2,0])
+                    rotate([0,0,90])
+                        text("Nichrome 80 32AWG", halign="center", valign="bottom", size=5);
+                translate([0,+2,0])
+                    rotate([0,0,90])
+                        text("2025-06-11 v1", halign="center", valign="center", size=5);
+                translate([+6,+2,0])
+                    rotate([0,0,90])
+                        text("HydroModem", halign="center", valign="top", size=5);
+            }
+        }
+    }
 
     // Mount for rotating release arm bolt
     translate([width/2-mount_width,-length/2,0]) {
