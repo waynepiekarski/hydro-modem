@@ -16,7 +16,7 @@ all: $(TARGETS)
 	openscad --render -o $@ $<
 
 %.3mf: %.stl
-	./PrusaSlicer.AppImage --output $@ --export-3mf $<
+	./slicer --output $@ --export-3mf $<
 
 clean:
 	git clean -dxf *.3mf *.stl *.png *.gcode
