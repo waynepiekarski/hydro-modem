@@ -424,7 +424,7 @@ int main(int _argc, const char *_argv[]) {
     // Print out the decoded string for use in shell scripts
     printf("%.f %.f = [%s]\n", diff_total_log10, diff_total, decoded.c_str());
 
-    if (decoded.size() == 0) {
+    if ((expected.length() != 0) && (decoded.length() == 0)) {
         fprintf(stderr, "Error: Did not recover any data\n");
         exit(1);
     }
