@@ -1,0 +1,4 @@
+# Arduino Nano with soldered Adafruit PAM8904 and piezo
+BAUD=500000
+FQBN=arduino:avr:nano:cpu=atmega328old
+OPTIBOOT_BAUD=57600
