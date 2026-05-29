@@ -6,6 +6,8 @@
 /linux-test/bell103_goertzel_wav_decoder
 /linux-test/bell103_goertzel_wav_encoder
 /linux-test/microphone-bell103-goertzel-recorded.wav
+/linux-test/temp-*.wav
+/linux-test/*.log
 
 # KiCAD v5
 *.net
