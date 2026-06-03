@@ -270,7 +270,6 @@ void sample() {
     int16_t sample = raw_sample - 512;
     sample_goertzel(sample);
     goertzel_offset++;
-    sample_offset++;
 
 #undef GRAPHICAL_DEBUG
 #ifdef GRAPHICAL_DEBUG

@@ -33,7 +33,9 @@ unsigned char current_byte = 0;
 int waiting_for_start = 1; // Flag to indicate waiting for start bit
 int reset_is_done = 0;
 int goertzel_offset = 0;
-int sample_offset = 0;
+#ifdef __linux__
+uint64_t sample_offset = 0;
+#endif // __linux__
 char last_char = -1;
 
 // 64-bit integers with 16-bit resolution passes all tests
